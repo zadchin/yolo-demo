@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>YOLO App</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <a class="navbar-brand" href="#">Self-Driving Car Training App</a>
+  </nav>
+
+  <div class="container mt-4">
+    <h1>Upload and Annotate</h1>
+
+    <div class="form-group">
+      <label for="imageUpload">Upload Images:</label>
+      <input type="file" class="form-control-file" id="imageUpload" multiple onchange="handleImageUpload(event)">
+    </div>
+    
+    <!-- Progress Bar -->
+    <p>Upload Progress Bar:</p>
+    <div class="progress mb-4">
+      <div class="progress-bar progress-bar-striped progress-bar-animated" id="progress" style="width: 0%;"></div>
+    </div>
+
+    <!-- Labels for Annotation -->
+   <!-- Labels for Annotation -->
+    <div id="label-section" class="form-group" style="display: none;">
+    <label for="labelInput">Add or Select Label:</label>
+    <input type="text" class="form-control" id="labelInput" placeholder="Add new label">
+    <button class="btn btn-primary mt-2" onclick="addLabel()">Add Label</button>
+    <select id="labelSelect" class="form-control mt-2">
+      <option value="car">Car</option>
+      <option value="cow">Cow</option>
+      <option value="signboard">Signboard</option>
+    </select>
+  </div>
+  
+  <!-- Image Navigation, Canvas, and Train Model Button Section -->
+  <div id="annotation-section" style="display: none;">
+    <!-- Image Navigation -->
+    <div id="image-navigation" class="d-flex justify-content-between align-items-center">
+      <button class="btn btn-primary" id="prev-btn" onclick="prevImage()">&#8249;</button>
+      <span id="image-index">1/3</span>
+      <button class="btn btn-primary" id="next-btn" onclick="nextImage()">&#8250;</button>
+    </div>
+  
+    <!-- Image Container and Drawing -->
+    <div id="canvas-container" class="mt-4">
+      <img src="your-image.png" id="screenshot" draggable="false">
+      <svg id="draw">
+        <rect id="marquee" />
+        <g id="boxes"></g>
+      </svg>
+    </div>
+  
+    <!-- 'Train Model' button -->
+    <button id="finish-btn" class="btn btn-success mt-4" onclick="redirectToTrain()">Train Model</button>
+  </div>
+  
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
