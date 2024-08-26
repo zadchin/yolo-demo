@@ -190,8 +190,7 @@ function redirectToTrain() {
     const steps = [
       "The model is brewing... ☕",
       "Preparing the magic... ✨",
-      "Adding the last bit of works to be done... 🔮",
-      "Finalizing the training... 🛠️" // Added an extra step
+      "Adding the last bit of works to be done... 🔮"
     ];
   
     let stepIndex = 0;
