@@ -5,65 +5,154 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>YOLO App</title>
   <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <nav class="navbar navbar-expand-lg navbar-dark">
-    <a class="navbar-brand" href="#">Self-Driving Car Training App</a>
-  </nav>
-
+  <nav class="navbar navbar-light bg-light shadow-sm">
+    <a class="navbar-brand font-weight-bold" href="#">Train a Self-Driving Car</a>
+    <div class="ml-auto d-flex align-items-center">
+        <span class="mr-2">Kai Song</span>
+        <img src="profile.jpeg" alt="Profile" class="rounded-circle" style="width: 40px; height: 40px;">
+    </div>
+</nav>
+ 
   <div class="container mt-4">
-    <h1>Upload and Annotate</h1>
+    <h1>Step 1: Upload</h1>
 
-    <div class="form-group">
-      <label for="imageUpload">Upload Images:</label>
-      <input type="file" class="form-control-file" id="imageUpload" multiple onchange="handleImageUpload(event)">
-    </div>
-    
-    <!-- Progress Bar -->
-    <p>Upload Progress Bar:</p>
-    <div class="progress mb-4">
-      <div class="progress-bar progress-bar-striped progress-bar-animated" id="progress" style="width: 0%;"></div>
+    <div class="upload-container">
+      <div class="file-drop-area">
+        <i class="material-icons" style="font-size:48px">file_upload</i>
+        <span class="choose-file-text">Drag and Drop files to upload</span>
+        <span class="or-text">or</span>
+        <button class="btn btn-primary rounded-pill browse-button">Browse</button>
+        <input type="file" id="imageUpload" class="file-input" multiple onchange="handleImageUpload(event)">
+        <small class="text-muted">Supported file types: jpeg, png, jpg, webp</small>
+      </div>
+
+      <div class="uploaded-files mt-4">
+        <strong class="uploaded-images-text">Uploaded Images</strong>
+        <ul id="fileList"></ul>
+      </div>
     </div>
 
-    <!-- Labels for Annotation -->
-   <!-- Labels for Annotation -->
-    <div id="label-section" class="form-group" style="display: none;">
-    <label for="labelInput">Add or Select Label:</label>
-    <input type="text" class="form-control" id="labelInput" placeholder="Add new label">
-    <button class="btn btn-primary mt-2" onclick="addLabel()">Add Label</button>
-    <select id="labelSelect" class="form-control mt-2">
-      <option value="car">Car</option>
-      <option value="cow">Cow</option>
-      <option value="signboard">Signboard</option>
-    </select>
+    <div id="label-section" class="row mt-4" style="display: none;">
+        <h1 class="text-center mt-5">Step 2: Annotate</h1>
+        <div class = "row">
+        <!-- Labels for Annotation -->
+        <div class="col-md-4">
+            <div class="container">
+                <div id="selected-items" class="selected-items"></div>
+                <div class="search-container">
+                    <input type="text" placeholder="Search labels" id="search-input">
+                    <div id="dropdown" class="dropdown"></div>
+                </div>
+            </div>
+        </div>
+  
+        <!-- Image Navigation, Canvas, and Train Model Button Section -->
+        <div id="annotation-section" class="col-md-8" style="display: none;">
+          <!-- Image Navigation -->
+          <div id="image-navigation" class="d-flex justify-content-between align-items-center mb-3">
+            <button class="btn btn-primary" id="prev-btn" onclick="prevImage()">&#8249;</button>
+            <span id="image-index">1/3</span>
+            <button class="btn btn-primary" id="next-btn" onclick="nextImage()">&#8250;</button>
+          </div>
+
+          <!-- Image Container and Drawing -->
+          <div id="canvas-container">
+            <img src="your-image.png" id="screenshot" draggable="false">
+            <svg id="draw">
+              <rect id="marquee" />
+              <g id="boxes"></g>
+            </svg>
+          </div>
+  
+          <!-- 'Train Model' button -->
+          <button id="finish-btn" class="btn btn-success mt-4" onclick="redirectToTrain()">Train Model</button>
+        </div>
+    </div>
+    </div>
   </div>
   
-  <!-- Image Navigation, Canvas, and Train Model Button Section -->
-  <div id="annotation-section" style="display: none;">
-    <!-- Image Navigation -->
-    <div id="image-navigation" class="d-flex justify-content-between align-items-center">
-      <button class="btn btn-primary" id="prev-btn" onclick="prevImage()">&#8249;</button>
-      <span id="image-index">1/3</span>
-      <button class="btn btn-primary" id="next-btn" onclick="nextImage()">&#8250;</button>
-    </div>
-  
-    <!-- Image Container and Drawing -->
-    <div id="canvas-container" class="mt-4">
-      <img src="your-image.png" id="screenshot" draggable="false">
-      <svg id="draw">
-        <rect id="marquee" />
-        <g id="boxes"></g>
-      </svg>
-    </div>
-  
-    <!-- 'Train Model' button -->
-    <button id="finish-btn" class="btn btn-success mt-4" onclick="redirectToTrain()">Train Model</button>
-  </div>
-  
-
-  </div>
-
+  <script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-beta.1/dist/js/select2.min.js"></script>
   <script src="script.js"></script>
+  
+  <script>
+    const labels = ['Car', 'Cow', 'Traffic Light', 'Sign Boards', 'Speed Limit'];
+    let selectedLabels = [];
+
+    const selectedItemsContainer = document.getElementById('selected-items');
+    const searchInput = document.getElementById('search-input');
+    const dropdown = document.getElementById('dropdown');
+
+    function renderDropdown(items) {
+        dropdown.innerHTML = '';
+        items.forEach(item => {
+            const div = document.createElement('div');
+            div.className = 'dropdown-item';
+            div.innerHTML = `
+                <span class="checkbox ${selectedLabels.includes(item) ? 'checked' : ''}"></span>
+                ${item}
+            `;
+            div.addEventListener('click', () => toggleLabel(item));
+            dropdown.appendChild(div);
+        });
+    }
+
+    function renderSelectedItems() {
+        selectedItemsContainer.innerHTML = '';
+        selectedLabels.forEach(label => {
+            const div = document.createElement('div');
+            div.className = 'selected-item';
+            div.innerHTML = `
+                <span>${label}</span>
+                <span class="close" onclick="removeLabel('${label}')">×</span>
+            `;
+            selectedItemsContainer.appendChild(div);
+        });
+    }
+
+    function toggleLabel(label) {
+        const index = selectedLabels.indexOf(label);
+        if (index > -1) {
+            selectedLabels.splice(index, 1);
+        } else {
+            selectedLabels.push(label);
+        }
+        renderSelectedItems();
+        renderDropdown(labels);
+    }
+
+    function removeLabel(label) {
+        const index = selectedLabels.indexOf(label);
+        if (index > -1) {
+            selectedLabels.splice(index, 1);
+        }
+        renderSelectedItems();
+        renderDropdown(labels);
+    }
+
+    searchInput.addEventListener('input', (e) => {
+        const searchTerm = e.target.value.toLowerCase();
+        const filteredLabels = labels.filter(label => 
+            label.toLowerCase().includes(searchTerm)
+        );
+        renderDropdown(filteredLabels);
+    });
+
+    renderDropdown(labels);
+
+    // Show label section after file upload (you'll need to implement this part)
+    document.querySelector('.file-input').addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            document.getElementById('label-section').style.display = 'block';
+            document.getElementById('annotation-section').style.display = 'block';
+        }
+    });
+</script>
 </body>
 </html>

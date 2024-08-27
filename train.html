@@ -3,16 +3,27 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Train Model</title>
+  <title>YOLO App</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700&display=swap">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <nav class="navbar navbar-light bg-light shadow-sm">
+    <a class="navbar-brand font-weight-bold" href="#">Train a Self-Driving Car</a>
+    <div class="ml-auto d-flex align-items-center">
+        <span class="mr-2">Kai Song</span>
+        <img src="profile.jpeg" alt="Profile" class="rounded-circle" style="width: 40px; height: 40px;">
+    </div>
+</nav>
   <div class="container">
-    <h1>Train Model</h1>
+    <h1 class="mt-5">Step 3: Train Model</h1>
     <div class="slider-container">
       <label for="conf-slider">Confidence:</label>
       <input type="range" id="conf-slider" min="0" max="1" step="0.1" value="0.5" oninput="updateValue('conf', this.value)">
-      <p class="slider-value" id="conf-value">0.5</p>
+      <p class="text-muted" id="conf-value">0.5</p>
       
       <label for="epochs-slider">Epochs:</label>
       <input type="range" id="epochs-slider" min="1" max="100" value="10" oninput="updateValue('epochs', this.value)">

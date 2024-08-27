@@ -104,32 +104,134 @@ function redirectToTrain() {
 
 function handleImageUpload(event) {
     images = Array.from(event.target.files);  // Store all uploaded images
-    const progressBar = document.getElementById('progress-bar');
-    const progress = document.getElementById('progress');
     const labelSection = document.getElementById('label-section');
     const annotationSection = document.getElementById('annotation-section');
+    const fileList = document.getElementById('fileList');
     
-    // Reset progress and label section
-    progress.style.width = '0%';
-    labelSection.style.display = 'none';
+    // Reset label section and annotation section
+    labelSection.classList.remove('show');
     annotationSection.style.display = 'none';
+    fileList.innerHTML = ''; // Clear previous files
     
     if (images.length === 0) return;
-    
-    let uploadProgress = 0;
-    const interval = setInterval(() => {
-      uploadProgress += 10;
-      progress.style.width = `${uploadProgress}%`;
-      
-      if (uploadProgress >= 100) {
-        clearInterval(interval);
-        // Show label section and annotation section after upload completes
-        labelSection.style.display = 'block';
-        annotationSection.style.display = 'block';
-        showImage(0);  // Show the first uploaded image
-      }
-    }, 100); // Simulate progress every 100ms
-  }
+
+    images.forEach((file, index) => {
+        const listItem = document.createElement('li');
+        const progressBar = document.createElement('div');
+        const progressBarFill = document.createElement('div');
+
+        listItem.innerHTML = `<span>${file.name}</span>`;
+
+        progressBar.className = 'progress';
+        progressBarFill.className = 'progress-bar';
+
+        progressBar.appendChild(progressBarFill);
+        listItem.appendChild(progressBar);
+        fileList.appendChild(listItem);
+
+        const reader = new FileReader();
+        reader.onloadstart = function() {
+            progressBarFill.style.width = '0%';
+        };
+        reader.onprogress = function(e) {
+            if (e.lengthComputable) {
+                const percentLoaded = Math.round((e.loaded / e.total) * 100);
+                progressBarFill.style.width = percentLoaded + '%';
+            }
+        };
+        reader.onloadend = function() {
+            progressBarFill.style.width = '100%';
+            setTimeout(() => {
+                listItem.removeChild(progressBar);
+            }, 500); // Remove progress bar after 0.5s
+        };
+        reader.onload = function(e) {
+            if (index === 0) {
+                showImage(0);
+                setTimeout(() => {
+                    labelSection.style.display = 'block'; // Show label section
+                    setTimeout(() => {
+                        labelSection.classList.add('show'); // Fade in the label section
+                    }, 10); // Small delay to trigger transition
+                    annotationSection.style.display = 'block';
+                }, 500); // Delay to ensure smooth transition after upload
+            }
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+
+function deleteFile(index) {
+    images.splice(index, 1); // Remove the file from the list
+    updateFileList(); // Update the display
+    if (images.length > 0) {
+        showImage(Math.min(currentImageIndex, images.length - 1));
+    } else {
+        // If no images left, hide sections
+        const labelSection = document.getElementById('label-section');
+        const annotationSection = document.getElementById('annotation-section');
+        labelSection.style.display = 'none';
+        annotationSection.style.display = 'none';
+        $screenshot.src = ''; // Clear the image
+    }
+}
+
+function updateFileList() {
+    const fileList = document.getElementById('fileList');
+    fileList.innerHTML = ''; // Clear previous files
+
+    images.forEach((file, index) => {
+        const listItem = document.createElement('li');
+        listItem.innerHTML = `
+            <span>${file.name}</span>
+            <span class="delete-icon" onclick="deleteFile(${index})">&times;</span>
+        `;
+        fileList.appendChild(listItem);
+    });
+}
+
+function showImage(index) {
+    if (index >= 0 && index < images.length) {
+        currentImageIndex = index;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $screenshot.src = e.target.result;
+        };
+        reader.readAsDataURL(images[currentImageIndex]);
+
+        // Clear rectangles when switching images
+        rectangles = [];
+        redraw();
+
+        document.getElementById('image-index').textContent = `${currentImageIndex + 1}/${images.length}`;
+
+        // Show "Train Model" button only on the last image
+        const finishBtn = document.getElementById('finish-btn');
+        if (currentImageIndex === images.length - 1) {
+            finishBtn.style.display = 'block';
+        } else {
+            finishBtn.style.display = 'none';
+        }
+    }
+}
+
+function prevImage() {
+    if (currentImageIndex > 0) {
+        showImage(currentImageIndex - 1);
+    }
+}
+
+function nextImage() {
+    if (currentImageIndex < images.length - 1) {
+        showImage(currentImageIndex + 1);
+    }
+}
+
+function redirectToTrain() {
+    window.location.href = "train.html";
+}
+
   
 
 function showImage(index) {
@@ -205,12 +307,7 @@ function redirectToTrain() {
         stepIndex++;
       } else {
         clearInterval(interval);
-  
-        // Create the graph image
-        // const graphImage = document.createElement('img');
-        // graphImage.src = confValue < 0.5 ? 'graphA.png' : 'graphB.png';
-        // graphImage.alt = 'Training Result Graph';
-        // graphImage.classList.add('graph-image');
+
   
         // Create the main picture image
         const resultImage = document.createElement('img');
@@ -220,7 +317,6 @@ function redirectToTrain() {
   
         // Append both images to the result container
         trainingResult.appendChild(resultImage);
-        // trainingResult.appendChild(graphImage);
   
         // Update the training status
         trainingStatus.textContent = "Training Completed! 🎉";

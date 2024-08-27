@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labels Dropdown</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            width: 300px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h2 {
+            color: #333;
+            margin-top: 0;
+        }
+        .selected-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            padding: 5px;
+            min-height: 32px;
+        }
+        .selected-item {
+            background-color: #f0f0f0;
+            border-radius: 4px;
+            padding: 5px 10px;
+            display: flex;
+            align-items: center;
+        }
+        .selected-item span {
+            margin-right: 5px;
+        }
+        .close {
+            cursor: pointer;
+            color: #888;
+        }
+        .search-container {
+            position: relative;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .dropdown {
+            margin-top: 5px;
+            border: 1px solid #d0d0d0;
+            border-radius: 4px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+        .dropdown-item {
+            padding: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        .dropdown-item:hover {
+            background-color: #f0f0f0;
+        }
+        .checkbox {
+            width: 18px;
+            height: 18px;
+            border: 2px solid #007bff;
+            border-radius: 4px;
+            margin-right: 10px;
+            display: inline-block;
+            position: relative;
+        }
+        .checkbox.checked::after {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #007bff;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Labels *</h2>
+        <div class="selected-items" id="selected-items"></div>
+        <div class="search-container">
+            <input type="text" placeholder="Search labels" id="search-input">
+            <div class="dropdown" id="dropdown"></div>
+        </div>
+    </div>
+
+    <script>
+        const labels = ['Car', 'Cow', 'Traffic Light', 'Sign Boards', 'Speed Limit'];
+        let selectedLabels = [];
+
+        const selectedItemsContainer = document.getElementById('selected-items');
+        const searchInput = document.getElementById('search-input');
+        const dropdown = document.getElementById('dropdown');
+
+        function renderDropdown(items) {
+            dropdown.innerHTML = '';
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'dropdown-item';
+                div.innerHTML = `
+                    <span class="checkbox ${selectedLabels.includes(item) ? 'checked' : ''}"></span>
+                    ${item}
+                `;
+                div.addEventListener('click', () => toggleLabel(item));
+                dropdown.appendChild(div);
+            });
+        }
+
+        function renderSelectedItems() {
+            selectedItemsContainer.innerHTML = '';
+            selectedLabels.forEach(label => {
+                const div = document.createElement('div');
+                div.className = 'selected-item';
+                div.innerHTML = `
+                    <span>${label}</span>
+                    <span class="close" onclick="removeLabel('${label}')">×</span>
+                `;
+                selectedItemsContainer.appendChild(div);
+            });
+        }
+
+        function toggleLabel(label) {
+            const index = selectedLabels.indexOf(label);
+            if (index > -1) {
+                selectedLabels.splice(index, 1);
+            } else {
+                selectedLabels.push(label);
+            }
+            renderSelectedItems();
+            renderDropdown(labels);
+        }
+
+        function removeLabel(label) {
+            const index = selectedLabels.indexOf(label);
+            if (index > -1) {
+                selectedLabels.splice(index, 1);
+            }
+            renderSelectedItems();
+            renderDropdown(labels);
+        }
+
+        searchInput.addEventListener('input', (e) => {
+            const searchTerm = e.target.value.toLowerCase();
+            const filteredLabels = labels.filter(label => 
+                label.toLowerCase().includes(searchTerm)
+            );
+            renderDropdown(filteredLabels);
+        });
+
+        renderDropdown(labels);
+    </script>
+</body>
+</html>
